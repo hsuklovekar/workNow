@@ -1,6 +1,5 @@
 import SingleReservoir.*;
 
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,9 +95,9 @@ public class MainTest {
             reservoir.addSupplyTarget(t2);
             reservoir.addSupplyTarget(t3);
 
-            result = reservoir.waterBalance();
+             //= reservoir.waterBalance();
 
-            NodeResult nodeResult1 = result.get("AAA001");
+            NodeResult nodeResult1 = reservoir.waterBalance();
             Map<String,SupplyActually>  supplyActuallys = nodeResult1.getSupplyActuallys();
             //
             //
@@ -125,7 +124,7 @@ public class MainTest {
         data.add(storageFinal);
         // 5.输出结果
         System.out.println("供水结果打印");
-        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result05073.csv", data);
+        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result05013.csv", data);
 /*
         List<SupplyActually> outputs = (List<SupplyActually>) result.get("output");
 
@@ -135,28 +134,68 @@ public class MainTest {
         }
 */
         System.out.println("时段末库容: " + reservoir.getStorageFinal());
-        List<SupplyTarget> supplyTargets = new ArrayList<>();
-        supplyTargets.add(t1);
-        supplyTargets.add(t2);
-        supplyTargets.add(t3);
-        supplyTargets.add(t4);
+        List<Double> citySupplyByExecute = new ArrayList<>();
+        List<Double> irrigateSupplyByExecute = new ArrayList<>();
+        List<Double> otherSupplyByExecute = new ArrayList<>();
+        List<Double> storageFinalByExecute = new ArrayList<>();
 
-        Map<String,Object> in = new HashMap<>();
-        Map<String,Object> op = new HashMap<>();
-        in.put("inputNatural",inflowList.get(1));
-        in.put("targetList",supplyTargets);
-        op.put("id","AAA001");
-        op.put("storageIntial",1288.0);
-        op.put("siStorage",100.0);
-        op.put("zhengChangStorage",4680.0);
-        op.put("evaporationLossCoefficient",0.05);
-        op.put("meanAnnualRunoff",5643.0);
-        op.put("ecologicalCoefficient",0.05);
-        op.put("timeStep",240);
+        double rollingStorage = 1288.0;
+        for (int i = 0; i < size; i++) {
+            SupplyTarget e1 = new SupplyTarget("A", CityList.get(i), DOMESTIC, 100.0, 100.0, 1, 1, list1);
+            SupplyTarget e2 = new SupplyTarget("B", irrigateList.get(i), AGRICULTURE, 100.0, 100.0, 2, 1, list1);
+            SupplyTarget e3 = new SupplyTarget("C", otherList.get(i), AGRICULTURE, 100.0, 100.0, 3, 1, list1);
+            SupplyTarget e4 = new SupplyTarget("D", 0.0, ReservoirDemand, 100.0, 4060.0, 4, 1, list1);
 
-        Map<String,Object> resultSingle = reservoir.execute(in,op);
-        NodeResult nodeResult1 = resultSingle.get("AAA001");
-        Double storageFinal1 = nodeResult1.getStorageFinal();
+            List<SupplyTarget> supplyTargets = new ArrayList<>();
+            supplyTargets.add(e1);
+            supplyTargets.add(e2);
+            supplyTargets.add(e3);
+            supplyTargets.add(e4);
+
+            Map<String, Object> in = new HashMap<>();
+            Map<String, Object> op = new HashMap<>();
+            in.put("inputNatural", inflowList.get(i));
+            in.put("targetList", supplyTargets);
+            op.put("id", "AAA001");
+            op.put("storageIntial", rollingStorage);
+            op.put("siStorage", 100.0);
+            op.put("zhengChangStorage", 4060.0);
+            op.put("evaporationLossCoefficient", 0.05);
+            op.put("meanAnnualRunoff", 5643.0);
+            op.put("ecologicalCoefficient", 0.1);
+            op.put("timeStep", 240);
+            op.put("isCharge", false);
+
+            Map<String, Object> resultSingle = reservoir.execute(in, op);
+            NodeResult nodeResult1 = (NodeResult) resultSingle.get("AAA001");
+            Map<String, SupplyActually> supplyActuallys = nodeResult1.getSupplyActuallys();
+
+            citySupplyByExecute.add(supplyActuallys.get("A").getEffectiveSupply());
+            irrigateSupplyByExecute.add(supplyActuallys.get("B").getEffectiveSupply());
+            otherSupplyByExecute.add(supplyActuallys.get("C").getEffectiveSupply());
+            storageFinalByExecute.add(nodeResult1.getStorageFinal());
+            rollingStorage = nodeResult1.getStorageFinal();
+        }
+
+        System.out.println("execute 方式供水成果打印");
+        for (int i = 0; i < size; i++) {
+            System.out.println(
+                    "时段 " + i
+                            + " | inflow=" + inflowList.get(i)
+                            + " | city=" + citySupplyByExecute.get(i)
+                            + " | irrigate=" + irrigateSupplyByExecute.get(i)
+                            + " | other=" + otherSupplyByExecute.get(i)
+                            + " | storageFinal=" + storageFinalByExecute.get(i)
+            );
+        }
+
+        List<List<Double>> executeData = new ArrayList<>();
+        executeData.add(inflowList);
+        executeData.add(citySupplyByExecute);
+        executeData.add(irrigateSupplyByExecute);
+        executeData.add(otherSupplyByExecute);
+        executeData.add(storageFinalByExecute);
+        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result_execute_3.csv", executeData);
 
     }
 }

@@ -232,12 +232,14 @@ public class Reservoir {
 
             //if (totalDemand == 0) continue;
             double used = 0.0;
-            // 3. 组内按比例分配
-            for (SupplyTarget target : group) {
+            Set<String> validTargetIds = validTargets.stream()
+                    .map(SupplyTarget::getSupplyNodeId)
+                    .collect(Collectors.toSet());
+
+            // 3. 组内按比例分配（仅对符合条件的目标）
+            for (SupplyTarget target : validTargets) {
 
                 double supply = 0.0;
-                double lack = 0.0;
-
                 String ID = target.getSupplyNodeId();
 
                 // 按比例分“可用水量”
@@ -252,7 +254,6 @@ public class Reservoir {
                             timeStep,
                             target);
                 }
-                lack = target.getDemand() - supply;
 
                 SupplyActually effectiveSupply = new SupplyActually(ID, supply);
                 effectiveSupplys.put(ID, effectiveSupply);
@@ -260,7 +261,15 @@ public class Reservoir {
                 supplyAll += supply;
             }
 
-            //4. 统一扣减这一组用掉的水
+            // 4. 对不符合条件的目标补全 0 供水，避免下游调用出现空值
+            for (SupplyTarget target : group) {
+                String ID = target.getSupplyNodeId();
+                if (!validTargetIds.contains(ID)) {
+                    effectiveSupplys.put(ID, new SupplyActually(ID, 0.0));
+                }
+            }
+
+            //5. 统一扣减这一组用掉的水
             availableWater -= used;
             //if (availableWater <= 0) break;
 

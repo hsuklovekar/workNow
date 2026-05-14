@@ -50,6 +50,7 @@ public class Reservoir {
     private String reservoirId;
     boolean isCharge;// 是否允许充库
     double waterCharge;// 上一时段充库水量
+    boolean isFloodTime;//是否在汛期
     //
     private double[][] waterLevelCapacityCurve;//水位-库容曲线
     private double evaporationLossCoefficient;//蒸散发损失系数
@@ -64,6 +65,7 @@ public class Reservoir {
 
     // 特征水位
     private double siLevel;
+    private double xunxianLevel;
     private double zhengChangLevel;
     private double fangHongGaoLevel;
     private double jiaoHeLevel;
@@ -71,6 +73,7 @@ public class Reservoir {
 
     // 特征库容
     private double siStorage;
+    private double xunxianStorage;
     private double zhengChangStorage;
     private double fangHongGaoStorage;
     private double jiaoHeStorage;
@@ -171,7 +174,10 @@ public class Reservoir {
     @SuppressWarnings("unchecked")
     public NodeResult waterBalance() {
         Map<String, NodeResult> results = new HashMap<>();//输出
-
+        Double maxStorage = zhengChangStorage;
+        if(isFloodTime) {
+            maxStorage = xunxianStorage;
+        }
         Double availableWater = storageIntial - siStorage + inputNatural;//可供水量 = 当前水位对应库容减死水位对应库容 + 来水量
 
         Double evaporationLossWater;//扣除蒸散发水量
@@ -278,9 +284,9 @@ public class Reservoir {
         //计算时段末库容
         storageFinal = availableWaterInitial - supplyAll + siStorage;
         //计算弃水
-        if (storageFinal > zhengChangStorage) {
-            waterSurplus = storageFinal - zhengChangStorage;
-            storageFinal = zhengChangStorage;
+        if (storageFinal > maxStorage) {
+            waterSurplus = storageFinal - maxStorage;
+            storageFinal = maxStorage;
         }
         //计算缺水
         storageFinal = Math.max(siStorage, storageFinal);
@@ -323,6 +329,7 @@ public class Reservoir {
             String Id = (String) operatorParams.get("id");
             Double storageIntial = (Double) operatorParams.get("storageIntial");
             Double siStorage = (Double) operatorParams.get("siStorage");
+            Double xunxianStorage = (Double) operatorParams.get("xunxianStorage");
             Double zhengChangStorage = (Double) operatorParams.get("zhengChangStorage");
             Double evaporationLossCoefficient = (Double) operatorParams.get("evaporationLossCoefficient");
             Double meanAnnualRunoff = (Double) operatorParams.get("meanAnnualRunoff");

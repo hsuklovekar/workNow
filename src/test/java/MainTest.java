@@ -162,7 +162,7 @@ public class MainTest {
             op.put("zhengChangStorage", 6220.0);
             op.put("xunxianStorage", 6220.0);
             op.put("evaporationLossCoefficient", 0.05);
-            op.put("meanAnnualRunoff", 5653.0);
+            op.put("meanAnnualRunoff", 5643.0);
             op.put("ecologicalCoefficient", 0.1);
             op.put("timeStep", 240);
             op.put("isCharge", false);

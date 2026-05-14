@@ -1,4 +1,5 @@
 package SingleReservoir;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 /**
@@ -310,7 +311,17 @@ public class Reservoir {
      * @param operatorParams
      * @return
      */
-    public Map<String, Object> execute(Map<String, Object> inputParams, Map<String, Object> operatorParams) {
+
+
+    /**
+     * 执行单库供水计算，可选是否启用 DDT 系数修正。
+     *
+     * @param inputParams   输入参数，至少包含 inputNatural、targetList；启用 DDT 时需提供 currentDate、currentWaterLevel
+     * @param operatorParams 算子参数；启用 DDT 时可提供 ddt 对象
+     * @return 结果 Map
+     */
+    public Map<String, Object> execute(Map<String, Object> inputParams,
+                                       Map<String, Object> operatorParams) {
         Map<String, Object> result = new HashMap<>();
 
         Reservoir reservoir = new Reservoir();
@@ -318,9 +329,24 @@ public class Reservoir {
             // ========== 参数提取（按业务约定） ==========
             // 上游输入：本算子约定接收inputNatural TargetList
             Double inputNatural = (Double) inputParams.get("inputNatural");
-            List<SupplyTarget> TargetList = (List<SupplyTarget>) inputParams.get("targetList");
-            for (int i = 0; i < TargetList.size(); i++) {
-                SupplyTarget target = TargetList.get(i);
+            List<SupplyTarget> targetList = (List<SupplyTarget>) inputParams.get("targetList");
+
+            // enableDDT 控制流程：
+            // true  -> 使用 DDT.applyCoefficientsNewList 先生成“新列表”（不改原对象）
+            // false -> 直接使用原始 targetList
+            boolean enableDDT = operatorParams.containsKey("enableDDT");
+            List<SupplyTarget> targetsForCalculation = targetList;
+            if (enableDDT) {
+                DDT ddt = (DDT) operatorParams.get("ddt");
+                LocalDate currentDate = (LocalDate) inputParams.get("currentDate");
+                Double currentWaterLevel = (Double) operatorParams.get("storageIntial");
+
+                if (ddt != null && currentDate != null && currentWaterLevel != null && targetList != null) {
+                    targetsForCalculation = ddt.applyCoefficientsNewList(currentDate, currentWaterLevel, targetList);
+                }
+            }
+
+            for (SupplyTarget target : targetsForCalculation) {
                 reservoir.addSupplyTarget(target);
             }
             Double waterCharge = (Double) inputParams.get("waterCharge");
@@ -336,8 +362,6 @@ public class Reservoir {
             Double ecologicalCoefficient = (Double) operatorParams.get("ecologicalCoefficient");
             Integer timeStep = (Integer) operatorParams.get("timeStep");
             boolean isCharge = (Boolean) operatorParams.get("isCharge");
-
-
 
             reservoir.setReservoirId(Id);
             reservoir.setStorageIntial(storageIntial);   // 初始库容

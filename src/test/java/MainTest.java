@@ -166,6 +166,7 @@ public class MainTest {
             op.put("ecologicalCoefficient", 0.1);
             op.put("timeStep", 240);
             op.put("isCharge", false);
+            op.put("waterCharge", 0.0);
 
             Map<String, Object> resultSingle = reservoir.execute(in, op);
             NodeResult nodeResult1 = (NodeResult) resultSingle.get("AAA001");

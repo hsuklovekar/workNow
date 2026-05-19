@@ -133,6 +133,14 @@ public class Reservoir {
         return storageFinal;
     }
 
+    public void setWaterCharge(double waterCharge) {
+        this.waterCharge = waterCharge;
+    }
+
+    public double getWaterCharge(){
+        return waterCharge;
+    }
+
     // 供水对象列表
     private List<SupplyTarget> supplyTargets = new ArrayList<>();
     private List<SupplyActually> supplyActuallys = new ArrayList<>();
@@ -297,6 +305,7 @@ public class Reservoir {
         Double maxCharge = 0.0;
         if (isCharge) {
             maxCharge = chargeStorage - storageFinal;
+
             //WaterSupply.put("maxCharge", Arrays.asList(maxCharge));
         }
         ChargeDemand chargeDemand = new ChargeDemand(maxCharge);
@@ -362,6 +371,9 @@ public class Reservoir {
             Double ecologicalCoefficient = (Double) operatorParams.get("ecologicalCoefficient");
             Integer timeStep = (Integer) operatorParams.get("timeStep");
             boolean isCharge = (Boolean) operatorParams.get("isCharge");
+            Double changeStorage  = (Double) operatorParams.get("changeStorage");
+
+
 
             reservoir.setReservoirId(Id);
             reservoir.setStorageIntial(storageIntial);   // 初始库容
@@ -372,6 +384,8 @@ public class Reservoir {
             reservoir.setMeanAnnualRunoff(meanAnnualRunoff);//多年平均径流量
             reservoir.setEcologicalCoefficient(ecologicalCoefficient);
             reservoir.setTimeStep(timeStep);
+            reservoir.setWaterCharge(waterCharge);
+
             // ========== 业务逻辑 ==========
             NodeResult resultSupply = reservoir.waterBalance();
             //========== 返回结果（固定格式） ==========

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 调度图：包含水库名和多个调度区。
+ * 调度图：包含水库名和多个调度区、多个随时间变化的调度线。
  */
 public class DDT {
 

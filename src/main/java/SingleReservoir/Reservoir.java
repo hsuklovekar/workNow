@@ -332,7 +332,7 @@ public class Reservoir {
     public Map<String, Object> execute(Map<String, Object> inputParams,
                                        Map<String, Object> operatorParams) {
         Map<String, Object> result = new HashMap<>();
-
+        LocalDate currentDate = (LocalDate) inputParams.get("currentDate");
         Reservoir reservoir = new Reservoir();
         try {
             // ========== 参数提取（按业务约定） ==========
@@ -347,9 +347,8 @@ public class Reservoir {
             List<SupplyTarget> targetsForCalculation = targetList;
             if (enableDDT) {
                 DDT ddt = (DDT) operatorParams.get("ddt");
-                LocalDate currentDate = (LocalDate) inputParams.get("currentDate");
-                Double currentWaterLevel = (Double) operatorParams.get("storageIntial");
 
+                Double currentWaterLevel = (Double) operatorParams.get("storageIntial");
                 if (ddt != null && currentDate != null && currentWaterLevel != null && targetList != null) {
                     targetsForCalculation = ddt.applyCoefficientsNewList(currentDate, currentWaterLevel, targetList);
                 }
@@ -371,7 +370,11 @@ public class Reservoir {
             Double ecologicalCoefficient = (Double) operatorParams.get("ecologicalCoefficient");
             Integer timeStep = (Integer) operatorParams.get("timeStep");
             boolean isCharge = (Boolean) operatorParams.get("isCharge");
-            Double changeStorage  = (Double) operatorParams.get("changeStorage");
+            DDX ddx = (DDX) operatorParams.get("ddx");
+            if(isCharge) {
+                Double changeStorage  = ddx.getWaterLevel(currentDate);
+            }
+
 
 
 

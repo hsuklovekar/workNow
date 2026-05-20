@@ -58,6 +58,7 @@ public class DDT {
 
         DDQ matchedZone = findMatchedZone(currentDate, currentWaterLevel);
         Map<String, Double> coefficientMap = matchedZone == null ? null : matchedZone.getTaskCoefficients();
+        Double matchedLowerWaterLevel = matchedZone == null ? null : matchedZone.getLowerWaterLevel();
 
         for (SupplyTarget target : targets) {
             // 先拷贝原对象字段，确保不修改原对象
@@ -80,6 +81,9 @@ public class DDT {
             }
             double newCoefficient = target.getCoefficient() * multiplier;
             copiedTarget.setCoefficient(newCoefficient);
+            if (matchedLowerWaterLevel != null) {
+                copiedTarget.setLowerStorageLimit(matchedLowerWaterLevel);
+            }
             result.add(copiedTarget);
         }
 

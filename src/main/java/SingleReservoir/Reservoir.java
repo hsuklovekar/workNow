@@ -133,8 +133,8 @@ public class Reservoir {
         return storageFinal;
     }
 
-    public void setWaterCharge(double waterCharge) {
-        this.waterCharge = waterCharge;
+    public void setChargeStorage(double chargeStorage) {
+        this.chargeStorage = chargeStorage;
     }
 
     public double getWaterCharge(){
@@ -371,8 +371,9 @@ public class Reservoir {
             Integer timeStep = (Integer) operatorParams.get("timeStep");
             boolean isCharge = (Boolean) operatorParams.get("isCharge");
             DDX ddx = (DDX) operatorParams.get("ddx");
+            Double thisChargeStorage = 0.0;
             if(isCharge) {
-                Double changeStorage  = ddx.getWaterLevel(currentDate);
+                thisChargeStorage  = ddx.getWaterLevel(currentDate);
             }
 
 
@@ -387,7 +388,7 @@ public class Reservoir {
             reservoir.setMeanAnnualRunoff(meanAnnualRunoff);//多年平均径流量
             reservoir.setEcologicalCoefficient(ecologicalCoefficient);
             reservoir.setTimeStep(timeStep);
-            reservoir.setWaterCharge(waterCharge);
+            reservoir.setChargeStorage(thisChargeStorage);
 
             // ========== 业务逻辑 ==========
             NodeResult resultSupply = reservoir.waterBalance();

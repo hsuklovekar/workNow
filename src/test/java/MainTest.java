@@ -124,7 +124,7 @@ public class MainTest {
         data.add(storageFinal);
         // 5.输出结果
         System.out.println("供水结果打印");
-        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result05013.csv", data);
+        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result0520.csv", data);
 /*
         List<SupplyActually> outputs = (List<SupplyActually>) result.get("output");
 
@@ -138,13 +138,13 @@ public class MainTest {
         List<Double> irrigateSupplyByExecute = new ArrayList<>();
         List<Double> otherSupplyByExecute = new ArrayList<>();
         List<Double> storageFinalByExecute = new ArrayList<>();
-
+        List<Double> D = new ArrayList<>();
         double rollingStorage = 1288.0;
         for (int i = 0; i < size; i++) {
             SupplyTarget e1 = new SupplyTarget("A", CityList.get(i), DOMESTIC, 100.0, 100.0, 1, 1, list1);
             SupplyTarget e2 = new SupplyTarget("B", irrigateList.get(i), AGRICULTURE, 100.0, 100.0, 2, 1, list1);
             SupplyTarget e3 = new SupplyTarget("C", otherList.get(i), AGRICULTURE, 100.0, 100.0, 3, 1, list1);
-            SupplyTarget e4 = new SupplyTarget("D", 0.0, ReservoirDemand, 100.0, 4060.0, 4, 1, list1);
+            SupplyTarget e4 = new SupplyTarget("D", 100.0, ReservoirDemand, 100.0, 4060.0, 4, 1, list1);
 
             List<SupplyTarget> supplyTargets = new ArrayList<>();
             supplyTargets.add(e1);
@@ -175,6 +175,7 @@ public class MainTest {
             citySupplyByExecute.add(supplyActuallys.get("A").getEffectiveSupply());
             irrigateSupplyByExecute.add(supplyActuallys.get("B").getEffectiveSupply());
             otherSupplyByExecute.add(supplyActuallys.get("C").getEffectiveSupply());
+            D.add(supplyActuallys.get("D").getEffectiveSupply());
             storageFinalByExecute.add(nodeResult1.getStorageFinal());
             rollingStorage = nodeResult1.getStorageFinal();
         }

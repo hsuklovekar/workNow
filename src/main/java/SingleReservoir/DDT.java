@@ -49,8 +49,8 @@ public class DDT {
      * 注意：该方法不会修改原始 targets 列表中的对象。
      */
     public List<SupplyTarget> applyCoefficientsNewList(LocalDate currentDate,
-                                                        double currentWaterLevel,
-                                                        List<SupplyTarget> targets) {
+                                                       double currentWaterLevel,
+                                                       List<SupplyTarget> targets) {
         List<SupplyTarget> result = new ArrayList<>();
         if (targets == null || targets.isEmpty()) {
             return result;

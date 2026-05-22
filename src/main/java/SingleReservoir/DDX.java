@@ -36,4 +36,12 @@ public class DDX {
 
         return null;
     }
+
+    public List<WaterLevelPeriod> getPeriods() {
+        return periods;
+    }
+
+    public void setPeriods(List<WaterLevelPeriod> periods) {
+        this.periods = periods;
+    }
 }

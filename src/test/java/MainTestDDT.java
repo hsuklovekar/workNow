@@ -1,8 +1,4 @@
-import SingleReservoir.DDQ;
-import SingleReservoir.DDT;
-import SingleReservoir.PipeParam;
-import SingleReservoir.SupplyTarget;
-import SingleReservoir.SupplyType;
+import SingleReservoir.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,8 +24,8 @@ public class MainTestDDT {
         coefficientsZone1.put(SupplyType.AGRICULTURE.name(), 0.60);
 
         DDQ zone1 = new DDQ(
-                LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 6, 30),
+                "01-01",
+                "06-30",
                 120.0,
                 100.0,
                 coefficientsZone1
@@ -40,8 +36,8 @@ public class MainTestDDT {
         coefficientsZone2.put(SupplyType.AGRICULTURE.name(), 0.75);
 
         DDQ zone2 = new DDQ(
-                LocalDate.of(2026, 7, 1),
-                LocalDate.of(2026, 12, 31),
+                "07-01",
+                "12-31",
                 99.9,
                 80.0,
                 coefficientsZone2
@@ -58,7 +54,7 @@ public class MainTestDDT {
         // Step 3: 构建原始 SupplyTarget 列表（至少两个且 SupplyType 不同）
         // -----------------------------
         List<PipeParam> pipeParams = new ArrayList<>();
-        pipeParams.add(new PipeParam("P-01", 100.0, 80.0, 20.0));
+        pipeParams.add(new PipeParam("P-01", 100.0, 20.0));
 
         SupplyTarget t1 = new SupplyTarget(
                 "NODE-A",

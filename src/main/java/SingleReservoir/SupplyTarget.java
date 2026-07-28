@@ -1,7 +1,10 @@
 package SingleReservoir;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SupplyTarget {
 
     // 供水节点
@@ -13,7 +16,7 @@ public class SupplyTarget {
     private SupplyType supplyType;
 
     // 最大供水规模 (m³/s)
-    //private double maxSupplyScale;
+//    private double maxSupplyScale;
 
     // 起供库容
     private double startSupplyStorageLimit;
@@ -29,6 +32,9 @@ public class SupplyTarget {
 
     //  需求打折系数
     private double coefficient;
+
+    public SupplyTarget() {
+    }
 
     public SupplyTarget(String supplyNodeId,
                         double demand,
@@ -61,9 +67,9 @@ public class SupplyTarget {
         this.supplyType = supplyType;
     }
 
-//    public void setMaxSupplyScale(double maxSupplyScale) {
-//        return getUserSupplyScale(this.pipeParamList);
-//    }
+    public void setMaxSupplyScale(double maxSupplyScale) {
+        // 无意义参数，临时兼容
+    }
 
     public void setStartSupplyStorageLimit(double startSupplyStorageLimit) {
         this.startSupplyStorageLimit = startSupplyStorageLimit;
@@ -122,11 +128,11 @@ public class SupplyTarget {
         }
 
         // 初始化最小值为列表第一个元素的可用规模
-        Double minCapacity = pipeList.get(0).getAvailableCapacity();
+        Double minCapacity = pipeList.get(0).availableCapacity();
 
         for (PipeParam pipe : pipeList) {
-            if (pipe.getAvailableCapacity() < minCapacity) {
-                minCapacity = pipe.getAvailableCapacity();
+            if (pipe.availableCapacity() < minCapacity) {
+                minCapacity = pipe.availableCapacity();
             }
         }
         return minCapacity;

@@ -9,21 +9,49 @@ public class PipeParam {
     private String pipeId;
     // 管道最大容量
     private Double maxCapacity;
-    // 管道可用容量
-    private Double availableCapacity = 0.0;
     // 已占用容量
     private Double usedCapacity = 0.0;
 
+    public PipeParam() {
+    }
+
     public PipeParam(String pipeId,
                      Double maxCapacity,
-                     Double availableCapacity,
                      Double usedCapacity) {
         this.pipeId = pipeId;
         this.maxCapacity = maxCapacity;
-        this.availableCapacity = availableCapacity;
         this.usedCapacity = usedCapacity;
     }
-    public Double getAvailableCapacity() {
-        return availableCapacity;
+
+    // 管道可用容量 = 最大容量 - 已占用容量
+    public Double availableCapacity() {
+        return Math.max(maxCapacity - usedCapacity, 0.0);
+    }
+
+    public String getPipeId() {
+        return pipeId;
+    }
+
+    public void setPipeId(String pipeId) {
+        this.pipeId = pipeId;
+    }
+
+    public Double getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(Double maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    public void setAvailableCapacity(Double availableCapacity) {
+    }
+
+    public Double getUsedCapacity() {
+        return usedCapacity;
+    }
+
+    public void setUsedCapacity(Double usedCapacity) {
+        this.usedCapacity = usedCapacity;
     }
 }

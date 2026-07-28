@@ -1,4 +1,6 @@
 import SingleReservoir.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import jdk.nashorn.internal.runtime.JSONFunctions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,10 +14,10 @@ public class MainTest {
     public static void main(String[] args) throws Exception {
         //读取水库天然来水序列 /Users/xiefanyi/work/环北调度
         //读取水库需水序列
-        List<Double> inflowList = readCSV("/Users/xiefanyi/work/环北调度/inflowList.csv");
-        List<Double> CityList = readCSV("/Users/xiefanyi/work/环北调度/renyinD.csv");
-        List<Double> irrigateList = readCSV("/Users/xiefanyi/work/环北调度/irrigate.csv");
-        List<Double> otherList = readCSV("/Users/xiefanyi/work/环北调度/other.csv");
+        List<Double> inflowList = readCSV("C:\\Users\\Administrator\\Desktop\\FunctionOfReservoirRegulation\\src\\main\\resources\\testdata\\inflowList.csv");
+        List<Double> CityList = readCSV("C:\\Users\\Administrator\\Desktop\\FunctionOfReservoirRegulation\\src\\main\\resources\\testdata\\renyinD.csv");
+        List<Double> irrigateList = readCSV("C:\\Users\\Administrator\\Desktop\\FunctionOfReservoirRegulation\\src\\main\\resources\\testdata\\irrigate.csv");
+        List<Double> otherList = readCSV("C:\\Users\\Administrator\\Desktop\\FunctionOfReservoirRegulation\\src\\main\\resources\\testdata\\other.csv");
         // 1.创建水库对象
         Reservoir reservoir = new Reservoir();
         reservoir.setReservoirId("AAA001");
@@ -33,9 +35,9 @@ public class MainTest {
         // 3.构造供水对象
         List<PipeParam> list1 = new ArrayList<>();
         // 参数顺序：pipeId, maxCapacity, availableCapacity, usedCapacity
-        list1.add(new PipeParam("PIPE_MAIN_01", 100.0, 70.0, 30.0));  // 主干：余量充足
-        list1.add(new PipeParam("PIPE_SUB_01", 50.0, 25.0, 25.0));    // 分支：余量中等
-        list1.add(new PipeParam("PIPE_END_01", 20.0, 10.5, 9.5));     // 末端：余量最小
+        list1.add(new PipeParam("PIPE_MAIN_01", 100.0, 30.0));  // 主干：余量充足
+        list1.add(new PipeParam("PIPE_SUB_01", 50.0,  25.0));    // 分支：余量中等
+        list1.add(new PipeParam("PIPE_END_01", 20.0, 9.5));     // 末端：余量最小
 
         SupplyTarget t1 = new SupplyTarget(
                 "A",
@@ -124,7 +126,7 @@ public class MainTest {
         data.add(storageFinal);
         // 5.输出结果
         System.out.println("供水结果打印");
-        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result05013.csv", data);
+//        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result05013.csv", data);
 /*
         List<SupplyActually> outputs = (List<SupplyActually>) result.get("output");
 
@@ -140,11 +142,11 @@ public class MainTest {
         List<Double> storageFinalByExecute = new ArrayList<>();
 
         double rollingStorage = 1288.0;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < 1; i++) {
             SupplyTarget e1 = new SupplyTarget("A", CityList.get(i), DOMESTIC, 100.0, 100.0, 1, 1, list1);
             SupplyTarget e2 = new SupplyTarget("B", irrigateList.get(i), AGRICULTURE, 100.0, 100.0, 2, 1, list1);
             SupplyTarget e3 = new SupplyTarget("C", otherList.get(i), AGRICULTURE, 100.0, 100.0, 3, 1, list1);
-            SupplyTarget e4 = new SupplyTarget("D", 0.0, ReservoirDemand, 100.0, 4060.0, 4, 1, list1);
+            SupplyTarget e4 = new SupplyTarget("D", 100.0, ReservoirDemand, 100.0, 4060.0, 4, 1, list1);
 
             List<SupplyTarget> supplyTargets = new ArrayList<>();
             supplyTargets.add(e1);
@@ -156,6 +158,7 @@ public class MainTest {
             Map<String, Object> op = new HashMap<>();
             in.put("inputNatural", inflowList.get(i));
             in.put("targetList", supplyTargets);
+            in.put("waterCharge", 0.0);
             op.put("id", "AAA001");
             op.put("storageIntial", rollingStorage);
             op.put("siStorage", 33.0);
@@ -166,10 +169,9 @@ public class MainTest {
             op.put("ecologicalCoefficient", 0.1);
             op.put("timeStep", 240);
             op.put("isCharge", false);
-            op.put("waterCharge", 0.0);
 
             Map<String, Object> resultSingle = reservoir.execute(in, op);
-            NodeResult nodeResult1 = (NodeResult) resultSingle.get("AAA001");
+            NodeResult nodeResult1 = (NodeResult) ((Map<String,Object>)resultSingle.get("data")).get("AAA001");
             Map<String, SupplyActually> supplyActuallys = nodeResult1.getSupplyActuallys();
 
             citySupplyByExecute.add(supplyActuallys.get("A").getEffectiveSupply());
@@ -177,27 +179,32 @@ public class MainTest {
             otherSupplyByExecute.add(supplyActuallys.get("C").getEffectiveSupply());
             storageFinalByExecute.add(nodeResult1.getStorageFinal());
             rollingStorage = nodeResult1.getStorageFinal();
+
+            ObjectMapper MAPPER = new ObjectMapper();
+            System.out.println("inputParams: " + MAPPER.writeValueAsString(in));
+            System.out.println("operatorParams: " + MAPPER.writeValueAsString(op));
+            System.out.println("outputParams: " + MAPPER.writeValueAsString(resultSingle));
         }
 
-        System.out.println("execute 方式供水成果打印");
-        for (int i = 0; i < size; i++) {
-            System.out.println(
-                    "时段 " + i
-                            + " | inflow=" + inflowList.get(i)
-                            + " | city=" + citySupplyByExecute.get(i)
-                            + " | irrigate=" + irrigateSupplyByExecute.get(i)
-                            + " | other=" + otherSupplyByExecute.get(i)
-                            + " | storageFinal=" + storageFinalByExecute.get(i)
-            );
-        }
-
-        List<List<Double>> executeData = new ArrayList<>();
-        executeData.add(inflowList);
-        executeData.add(citySupplyByExecute);
-        executeData.add(irrigateSupplyByExecute);
-        executeData.add(otherSupplyByExecute);
-        executeData.add(storageFinalByExecute);
-        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result_execute_3.csv", executeData);
+//        System.out.println("execute 方式供水成果打印");
+//        for (int i = 0; i < size; i++) {
+//            System.out.println(
+//                    "时段 " + i
+//                            + " | inflow=" + inflowList.get(i)
+//                            + " | city=" + citySupplyByExecute.get(i)
+//                            + " | irrigate=" + irrigateSupplyByExecute.get(i)
+//                            + " | other=" + otherSupplyByExecute.get(i)
+//                            + " | storageFinal=" + storageFinalByExecute.get(i)
+//            );
+//        }
+//
+//        List<List<Double>> executeData = new ArrayList<>();
+//        executeData.add(inflowList);
+//        executeData.add(citySupplyByExecute);
+//        executeData.add(irrigateSupplyByExecute);
+//        executeData.add(otherSupplyByExecute);
+//        executeData.add(storageFinalByExecute);
+//        WriteCSV.writeByColumn("/Users/xiefanyi/work/环北调度/result_execute_3.csv", executeData);
 
     }
 }
